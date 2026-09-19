@@ -129,6 +129,30 @@ A public URL n8n exposes to "listen" for incoming data; when something is sent t
 
 ---
 
+## Deep Dive: Cosine Similarity (added Day 4)
+
+An embedding is a list of numbers representing a sentence's meaning. Think of each embedding as an **arrow pointing in some direction** in a high-dimensional space (384 dimensions in our case, but imagine just 2 numbers to picture it as an arrow on paper).
+
+Two sentences with **similar meaning** point in **similar directions**, even if one arrow is longer than the other. Two sentences with **unrelated meaning** point in very different directions.
+
+**Cosine similarity measures the angle between two arrows, not their length.** This matters because sentence length shouldn't make something seem "more different" — only meaning (direction) should.
+
+**Output range: always between -1 and 1:**
+- **1** = identical direction (same meaning)
+- **0** = unrelated (no relationship)
+- **-1** = opposite meaning (rare in practice for text)
+
+**Formula (for reference — the code does this for us):**
+```
+cosine_similarity = (A · B) / (|A| × |B|)
+```
+- `A · B` = dot product: multiply matching positions in both vectors, sum the results
+- `|A|`, `|B|` = each vector's magnitude/length: square root of the sum of squares of its numbers
+
+**How we use it:** compare the employee's question embedding against each of our 5 policy chunk embeddings, pick the highest-scoring chunk. If even the best score is below our chosen threshold, escalate instead of answering — this is literally what makes the bot "know what it doesn't know."
+
+---
+
 ## Concept Check — Quiz Recap (Day 1)
 Score: 4/5 (80%) on first attempt, 5/5 after review.
 
@@ -141,4 +165,3 @@ Score: 4/5 (80%) on first attempt, 5/5 after review.
 | 5 | When does logging happen? | On both paths — answered AND escalated — both branches reunite into the same logging step |
 
 **Reinforced understanding (in own words):** the policy document only needs to be chunked and embedded one time, upfront, as a setup step — re-embedding it on every single employee question would be wasteful and pointless since the document itself isn't changing per question.
-
