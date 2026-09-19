@@ -1,0 +1,315 @@
+{
+  "name": "HR-Assist-rag",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hr-question",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        -224
+      ],
+      "id": "e2e673c5-0e7e-4ad3-9664-73bf959688ce",
+      "name": "Webhook",
+      "webhookId": "a85f2489-e57a-462e-99bf-c788f17944d8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"inputs\": \"{{ $json.body.question }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        80,
+        -224
+      ],
+      "id": "be816586-b305-40f0-b4b1-2c077c47ab2a",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lPK4nUhhmUhJltPz",
+          "name": "HuggingFace API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/policy_embeddings.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        -224
+      ],
+      "id": "722a0af1-8277-4774-8c40-e62c2fe9992f",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        -224
+      ],
+      "id": "d7440057-769b-4f5d-8237-95f84180a890",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "043f22e2-e3e1-4145-9645-cde04a2699e4",
+              "leftValue": "={{ $json.bestMatch.score }}",
+              "rightValue": 0.35,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        -224
+      ],
+      "id": "526d9746-4032-40e0-b2c8-2fc5beff93ef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: \"openai/gpt-oss-20b\", messages: [ { role: \"user\", content: $json.prompt } ] } }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1424,
+        -224
+      ],
+      "id": "9c7acf03-3b71-498c-bdf6-60f231ce5934",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Mvr3An9EXsJ64iZG",
+          "name": "Groq APi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"answer\": \"{{ $json.answer }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1872,
+        -224
+      ],
+      "id": "b025e7c6-b974-4c7e-8a00-2f39e1862d31",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the question's embedding\nconst questionEmbedding = $('HTTP Request').first().json.body;\n\n// Get the 5 policy chunks with their embeddings\nconst chunks = items[0].json.data[0].chunks;\n\n// Cosine similarity function\nfunction cosineSimilarity(a, b) {\n  let dotProduct = 0, magA = 0, magB = 0;\n  for (let i = 0; i < a.length; i++) {\n    dotProduct += a[i] * b[i];\n    magA += a[i] * a[i];\n    magB += b[i] * b[i];\n  }\n  return dotProduct / (Math.sqrt(magA) * Math.sqrt(magB));\n}\n\n// Compare question against every chunk\nconst scored = chunks.map(chunk => ({\n  topic: chunk.topic,\n  text: chunk.text,\n  score: cosineSimilarity(questionEmbedding, chunk.embedding)\n}));\n\n// Sort by highest similarity first\nscored.sort((a, b) => b.score - a.score);\n\nreturn [{\n  json: {\n    question: $('Webhook').first().json.body.question,\n    bestMatch: scored[0],\n    allScores: scored\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        -224
+      ],
+      "id": "7c8a4c60-bb35-4b1f-8902-2914579ecfb7",
+      "name": "Code in JavaScript(does cosine similarity)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const question = items[0].json.question;\nconst context = items[0].json.bestMatch.text;\n\nconst prompt = `Answer the employee's question using ONLY the context below. If the answer isn't fully in the context, say \"I don't have enough information to answer that.\"\n\nContext: ${context}\n\nQuestion: ${question}`;\n\nreturn [{ json: { prompt } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -224
+      ],
+      "id": "1f1770dc-1741-4a6f-b5ae-8fd60bc05408",
+      "name": "Code in JavaScript1 (builds the Groq prompt)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const groqResponse = items[0].json.body;\nconst answerText = groqResponse.choices[0].message.content;\n\nreturn [{\n  json: {\n    answer: answerText,\n    outcome: \"answered\",\n    confidence: $('Code in JavaScript(does cosine similarity)').first().json.bestMatch.score\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        -224
+      ],
+      "id": "9d89a94e-463a-44b4-97a9-0fc1569e331a",
+      "name": "Code in JavaScript2(Groq call)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript(does cosine similarity)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1 (builds the Groq prompt)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2(Groq call)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript(does cosine similarity)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1 (builds the Groq prompt)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2(Groq call)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8a154c35-e451-4cbc-ab47-3ca0d3541c9e",
+  "meta": {
+    "instanceId": "09057974618eaf031207726cfb90274f0f3da5dcbadd4269878213c01bdb4466"
+  },
+  "nodeGroups": [],
+  "id": "HHPSAja6DRQJQyIL",
+  "tags": []
+}
