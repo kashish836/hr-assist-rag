@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -144,
-        -128
+        192,
+        -1168
       ],
       "id": "e2e673c5-0e7e-4ad3-9664-73bf959688ce",
       "name": "Webhook",
@@ -38,8 +38,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        80,
-        -128
+        416,
+        -1168
       ],
       "id": "be816586-b305-40f0-b4b1-2c077c47ab2a",
       "name": "HTTP Request",
@@ -58,8 +58,8 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        304,
-        -128
+        640,
+        -1168
       ],
       "id": "722a0af1-8277-4774-8c40-e62c2fe9992f",
       "name": "Read/Write Files from Disk"
@@ -72,8 +72,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        528,
-        -128
+        864,
+        -1168
       ],
       "id": "d7440057-769b-4f5d-8237-95f84180a890",
       "name": "Extract from File"
@@ -105,8 +105,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        976,
-        -128
+        1312,
+        -1168
       ],
       "id": "526d9746-4032-40e0-b2c8-2fc5beff93ef",
       "name": "If"
@@ -131,8 +131,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        1424,
-        -224
+        1760,
+        -1264
       ],
       "id": "9c7acf03-3b71-498c-bdf6-60f231ce5934",
       "name": "HTTP Request1",
@@ -152,8 +152,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1872,
-        -224
+        2432,
+        -1264
       ],
       "id": "b025e7c6-b974-4c7e-8a00-2f39e1862d31",
       "name": "Respond to Webhook"
@@ -165,8 +165,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        752,
-        -128
+        1088,
+        -1168
       ],
       "id": "7c8a4c60-bb35-4b1f-8902-2914579ecfb7",
       "name": "Code in JavaScript(does cosine similarity)"
@@ -178,8 +178,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        -224
+        1536,
+        -1264
       ],
       "id": "1f1770dc-1741-4a6f-b5ae-8fd60bc05408",
       "name": "Code in JavaScript1 (builds the Groq prompt)"
@@ -191,8 +191,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1648,
-        -224
+        1984,
+        -1264
       ],
       "id": "9d89a94e-463a-44b4-97a9-0fc1569e331a",
       "name": "Code in JavaScript2(Groq call)"
@@ -204,8 +204,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        -32
+        1536,
+        -1072
       ],
       "id": "558cf98c-f798-4393-9de2-50a8c0d7d602",
       "name": "Code in JavaScript"
@@ -221,8 +221,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1424,
-        -32
+        1760,
+        -1072
       ],
       "id": "df18e6e0-51ec-4973-b1a2-324fcaca0cb8",
       "name": "Send an Email",
@@ -233,6 +233,235 @@
           "name": "SMTP account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE",
+          "mode": "list",
+          "cachedResultName": "HR-Assist Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Question ": "={{ $('Code in JavaScript(does cosine similarity)').first().json.question }}",
+            "Matched_topics": "={{ $('Code in JavaScript(does cosine similarity)').first().json.bestMatch.topic }}",
+            "Confidence_score": "={{ $json.confidence }}",
+            "Answer_or_action": "={{ $json.answer }}",
+            "Outcome": "={{ $json.outcome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question ",
+              "displayName": "Question ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Matched_topics",
+              "displayName": "Matched_topics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Confidence_score",
+              "displayName": "Confidence_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outcome",
+              "displayName": "Outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Answer_or_action",
+              "displayName": "Answer_or_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2208,
+        -1264
+      ],
+      "id": "8b845c81-9262-4736-b090-f281ec2e84c8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yqrBlWTL1rRITzsi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE",
+          "mode": "list",
+          "cachedResultName": "HR-Assist Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nq9XEhoTwi7iuamRp4xB0BMsQ1DV7uyPJUmuAeiXPBE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toISO() }}",
+            "Question ": "={{ $json.question }}",
+            "Matched_topics": "N/A",
+            "Confidence_score": "={{ $json.confidence }}",
+            "Outcome": "={{ $json.outcome }}",
+            "Answer_or_action": "Escalated to HR"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Question ",
+              "displayName": "Question ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Matched_topics",
+              "displayName": "Matched_topics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confidence_score",
+              "displayName": "Confidence_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Outcome",
+              "displayName": "Outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Answer_or_action",
+              "displayName": "Answer_or_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1984,
+        -1072
+      ],
+      "id": "d4c3d7b4-7a9f-4160-b5cb-8ea79aa19a62",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yqrBlWTL1rRITzsi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"answer\": \"Your question has been forwarded to HR. Someone will follow up with you directly.\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2208,
+        -1072
+      ],
+      "id": "e4a8c8a4-822b-4fd9-bccf-98781821986a",
+      "name": "Respond to Webhook1"
     }
   ],
   "pinData": {},
@@ -336,7 +565,7 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Append row in sheet",
             "type": "main",
             "index": 0
           }
@@ -353,6 +582,39 @@
           }
         ]
       ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -360,7 +622,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "5a615f1f-e47d-4781-a992-d11f1dd35185",
+  "versionId": "8b19bb8d-b11b-4704-a141-92efff2b5940",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "09057974618eaf031207726cfb90274f0f3da5dcbadd4269878213c01bdb4466"

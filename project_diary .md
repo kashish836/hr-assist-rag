@@ -164,6 +164,14 @@ Next: Day 4 — build the LIVE question-answering workflow (webhook → embed qu
 - **Both core branches of the entire RAG pipeline are now fully functional and tested.**
 - Remaining: Google Sheets logging (both branches), test set + accuracy measurement, frontend page, final docs polish
 
+### Day 5 — MILESTONE: Google Sheets logging complete on both branches
+- Added "Append row in sheet" node on both the answer branch and escalation branch, right before each branch's "Respond to Webhook" node
+- Bug: Google Sheets OAuth credential was stale (same root cause as the earlier Gmail issue) — fixed by reconnecting (this one worked, unlike Gmail which needed the SMTP fallback)
+- Bug: forgot to add a second "Respond to Webhook" node on the escalation branch after adding logging — employee would get no reply at all after escalation. Caught before it became a real issue.
+- Verified both branches fully end-to-end: in-scope question → correct answer + logged row; out-of-scope question → escalation email received + "forwarded to HR" reply + logged row
+- **The entire core backend (both branches, retrieval, generation, escalation, logging) is now complete and tested.**
+- Remaining: run the full 15-20 question test set, build the frontend page, final docs/README polish
+
 ## Bugs & Fixes Log
 
 ### Bug 1: Hugging Face embedding API — "connection cannot be established, incorrect host domain"
