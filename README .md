@@ -1,53 +1,141 @@
 # HR-Assist RAG
 
-## What is this?
+---
 
-HR-Assist is a RAG-based HR Policy Q&A bot that gives employees instant answers to common questions about leave, insurance, WFH, and reimbursement — grounded in the company's actual HR policy documents, not guesswork. If a question isn't covered, it's escalated to HR with the employee's name and email attached, so a real person can follow up.
+![GitHub last commit](https://img.shields.io/github/last-commit/kashish836/hr-assist-rag)
+![GitHub repo size](https://img.shields.io/github/repo-size/kashish836/hr-assist-rag)
+![n8n](https://img.shields.io/badge/n8n-workflow-EA4B71?logo=n8n)
+![Groq](https://img.shields.io/badge/LLM-Groq%20gpt--oss--20b-orange)
+![Hugging Face](https://img.shields.io/badge/Embeddings-HuggingFace-yellow?logo=huggingface)
+![Test Accuracy](https://img.shields.io/badge/test%20accuracy-15%2F15%20(100%25)-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Status](https://img.shields.io/badge/status-complete-success)
 
-## How it works
+---
 
-An employee asks a question through the chat interface. The system retrieves the most relevant section of the HR policy documents using embeddings and cosine similarity, then passes that context to an LLM (Groq) to generate a grounded answer. If the question isn't covered, it's escalated via email instead of risking an incorrect answer. Every interaction is logged to Google Sheets.
+A RAG-based HR policy assistant that gives employees instant, grounded answers to common HR questions — and escalates to a real person when it doesn't know, instead of guessing.
 
-See [Architecture](docs/Architecture.md) for the full diagram and design decisions.
+---
 
-## Try it
+## Overview
 
-Open `frontend/index.html` in a browser (requires the n8n workflow running locally — see below).
+HR-Assist reads a company's actual HR policy documents and answers employee questions in natural language, using retrieval-augmented generation (RAG) rather than relying on an LLM's general knowledge. If a question falls outside what's documented, it's routed to HR by email — with the employee's name and contact info attached — instead of producing an unreliable answer.
+
+Built end-to-end with n8n as the orchestration layer, this project was also an exercise in debugging real production issues: deprecated APIs, broken OAuth credentials, and workflow failure-handling — all documented in the [project diary](project_diary.md).
+
+---
+
+## Try It
+
+```
+frontend/index.html   → landing page
+frontend/chat.html    → chat interface
+```
+Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
+
+---
 
 ## Tech Stack
 
-* n8n (workflow orchestration, self-hosted via Docker)
-* Groq — `openai/gpt-oss-20b` for answer generation
-* Hugging Face — `sentence-transformers/all-MiniLM-L6-v2` for embeddings
-* Google Sheets — structured logging
-* SMTP (Gmail App Password) — escalation email delivery
-* Plain HTML/CSS/JS — two-page frontend (landing + chat), no build tooling
+| Category | Technology |
+|---|---|
+| Orchestration | n8n (self-hosted, Docker) |
+| LLM | Groq — `openai/gpt-oss-20b` |
+| Embeddings | Hugging Face — `sentence-transformers/all-MiniLM-L6-v2` |
+| Retrieval | Cosine similarity (custom JS implementation) |
+| Logging | Google Sheets (OAuth2) |
+| Escalation delivery | SMTP (Gmail App Password) |
+| Frontend | Plain HTML / CSS / JS — no build tooling |
 
-## Result
+---
 
-**15/15 (100%) accuracy** on a 15-question test set (10 in-scope, 5 out-of-scope). Full methodology and results in [Testing & QA](docs/Testing-QA.md).
+## Features
+
+- Natural-language HR policy Q&A, grounded in real documents (no hallucinated answers)
+- Confidence-threshold routing: answers when it knows, escalates when it doesn't
+- Escalation emails include employee name + email for direct follow-up
+- Every interaction logged (answered or escalated) with full structured detail
+- Two-page frontend: marketing-style landing page + full chat interface
+- Light/dark theme, synced across pages
+
+---
+
+## Pipeline
+
+```text
+Employee question (chat UI)
+        ↓
+ n8n Webhook
+        ↓
+ Embed question (Hugging Face)
+        ↓
+ Cosine similarity vs. pre-embedded policy chunks
+        ↓
+ Confidence ≥ 0.35? ──── NO ──→ Escalation email (SMTP) → Log → Respond
+        │
+       YES
+        ↓
+ Groq LLM generates grounded answer → Log → Respond
+```
+
+Full diagram and design rationale in [Architecture.md](docs/Architecture.md).
+
+---
+
+## Results
+
+| Metric | Result |
+|---|---|
+| Test set | 15 questions (10 answerable, 5 out-of-scope) |
+| Answer accuracy | 10/10 (100%) |
+| Escalation accuracy | 5/5 (100%) |
+| Overall accuracy | **15/15 (100%)** |
+| Confidence threshold | 0.35 (set from real observed score gap) |
+| Cost | $0 — free tier throughout |
+
+Full test log in [Testing-QA.md](docs/Testing-QA.md).
+
+---
+
+## Notable Challenges & Fixes
+
+- Hugging Face fully deprecated its old inference endpoint mid-project — migrated to their current router endpoint.
+- Groq's available model lineup changed twice; resolved by querying the account's real available models via Groq's own API instead of trusting docs.
+- n8n halts an entire execution when any node fails, even on a separate branch — a stale logging credential was silently blocking employee responses. Fixed with parallel branching + "Continue on error."
+- AI-generated answers containing quotes/line breaks broke raw JSON string templating — fixed by building request/response bodies with real expression syntax instead.
+
+Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
+
+---
+
+## Known Limitations
+
+- Runs against a local n8n instance — not publicly hosted
+- English only, no multilingual support
+- No conversation memory — each question is handled independently
+- No employee authentication (name/email are self-reported, not verified)
+
+---
+
+## Security
+
+- No API keys or secrets committed to the repo — all credentials in n8n's credential store
+- Policy documents used are sample/fictional data, not a real company's information
+
+---
 
 ## Project Docs
 
-* [PRD](docs/PRD.md)
-* [TRD](docs/TRD.md)
-* [Architecture](docs/Architecture.md)
-* [Feature List](docs/Feature.md)
-* [API/Integration](docs/API-Integration.md)
-* [Testing & QA](docs/Testing-QA.md)
-* [Workflow notes & concepts](notes.md)
-* [Full project diary — planning, decisions, and every bug hit](project_diary.md)
+[PRD](docs/PRD.md) · [TRD](docs/TRD.md) · [Architecture](docs/Architecture.md) · [Feature List](docs/Feature.md) · [API/Integration](docs/API-Integration.md) · [Testing & QA](docs/Testing-QA.md) · [Workflow Notes](notes.md) · [Full Project Diary](project_diary.md)
 
-## Lessons Learned
+---
 
-This project surfaced several real engineering lessons worth calling out (full detail in the project diary):
+## Author
 
-- **APIs change underneath you.** Hugging Face fully deprecated its old inference endpoint mid-project, and Groq's available model lineup shifted twice. The fix each time was the same: verify directly against the provider's current docs or, better, query their API's own "list available models" endpoint rather than trusting external tutorials or memory.
-- **A workflow's failure behavior matters as much as its happy path.** n8n stops an entire execution when any single node fails — even on what looks like a separate branch. A stale credential on a logging node was silently preventing employees from getting responses at all. The fix was both a settings change ("On Error: Continue") and a real architecture improvement (parallel branches instead of one sequential chain).
-- **Don't template untrusted text into raw JSON strings.** AI-generated answers can contain quotes and line breaks that break naive string substitution. Building request/response bodies with a real expression/object syntax instead of string templating fixes this permanently, not just for the specific text that happened to break it.
-- **Not every OAuth problem is worth fully solving.** When Gmail's OAuth credential broke, switching to SMTP with an app password was the pragmatic, still-secure choice for a single-account project — properly diagnosing and fixing broken OAuth (as was eventually done for Google Sheets) is valuable, but knowing when a simpler alternative is good enough is also a real engineering skill.
-- **Check the real execution log, not the idle editor view.** A significant chunk of debugging time was lost looking at an idle canvas instead of n8n's actual Executions history, which showed the real error immediately once checked.
+**Kashish Bhiwapurkar**
 
-## Status
+---
 
-✅ Complete — full RAG pipeline, escalation, logging, and two-page frontend all built and tested end-to-end.
+## License
+
+This project is licensed under the MIT License.
