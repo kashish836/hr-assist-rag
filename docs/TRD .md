@@ -1,65 +1,68 @@
 # Technical Requirements Document (TRD) — HR-Assist RAG
 
 ## 1. Purpose
-Defines the technical requirements and constraints needed to implement the goals set out in the PRD.
+Defines the technical requirements and constraints for HR-Assist RAG, updated to reflect actual implementation decisions.
 
 ## 2. Technical Constraints
-- Must run entirely on **free-tier services** — no paid APIs, no GPU required
-- Must be buildable and runnable using **n8n** as the orchestration layer
-- Must not hardcode any API keys or secrets — all credentials managed via n8n's built-in credentials store
-- Must handle external API failures gracefully (timeouts, rate limits) rather than crashing the workflow silently
+- Runs entirely on free-tier services — no paid APIs, no GPU
+- Orchestrated via n8n (self-hosted, Docker)
+- No hardcoded secrets — all credentials managed via n8n's credentials store
+- Handles external API failures without breaking the employee-facing response (see Error Handling below)
 
-## 3. System Requirements
+## 3. System Requirements (as built)
 
 ### 3.1 Input
-- Accepts a single natural-language text question via HTTP POST to an n8n webhook
-- No authentication required for v1 (public demo webhook)
+- Two-page web frontend: a home/landing page and a chat interface
+- Chat interface posts to an n8n webhook via `fetch()`, including `question`, `employeeName`, and `employeeEmail`
 
 ### 3.2 Embeddings
-- Uses Hugging Face Inference API with a sentence-transformers model (e.g., `sentence-transformers/all-MiniLM-L6-v2`) to generate embeddings for both the policy chunks (one-time) and incoming questions (per request)
-- Embeddings must be generated using the same model for both chunks and questions, so they're comparable
+- Hugging Face's Inference Providers router: `https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction`
+- **Note:** the original `api-inference.huggingface.co` endpoint was fully deprecated mid-project; migrated to the router endpoint (see diary Bug 1)
+- Produces 384-dimension embeddings for both policy chunks (one-time) and live questions (per request)
 
 ### 3.3 Chunking
-- Policy document is split into chunks by topic/section (one chunk per policy topic, e.g., "Leave Policy," "WFH Policy"), not by arbitrary character count
-- Chunking is a one-time preprocessing step, re-run only if the source policy document changes
+- Policy document split into 5 topic-based chunks (Leave, WFH, Insurance, Travel & Reimbursement, Notice Period)
+- One-time preprocessing, stored to disk, not re-run per question
 
 ### 3.4 Retrieval
-- Cosine similarity is used to compare the question's embedding against all stored chunk embeddings
-- The single highest-scoring chunk (or top-N, TBD during build) is selected as retrieved context
+- Cosine similarity computed in a Code node (custom JS implementation, not a library)
+- Highest-scoring chunk selected as retrieved context
 
 ### 3.5 Confidence Threshold
-- A similarity score threshold (exact value to be tuned during testing, starting estimate: 0.6-0.7 on a 0-1 cosine similarity scale) determines whether the match is trusted
-- Below threshold → escalate; above threshold → proceed to answer generation
+- Set to **0.35**, chosen from real observed data (correct matches scored ~0.6-0.75, incorrect/unrelated chunks scored 0.10-0.25) rather than an estimated range
 
 ### 3.6 Answer Generation
-- Uses Groq API (Llama 3.1 model) for LLM inference
-- Prompt must explicitly instruct the model to answer only from provided context and to indicate if the context doesn't contain the answer
+- **Model:** `openai/gpt-oss-20b` via Groq's API
+- **Note:** original plan assumed Llama models would be available; discovered via Groq's own `/v1/models` endpoint that the account only has access to OpenAI's open-weight gpt-oss models (see diary Bug 3)
+- Prompt instructs the model to answer only from provided context
 
 ### 3.7 Escalation
-- Triggered when similarity score is below threshold
-- Sends an email (via n8n's Gmail node) to a configured HR contact address, containing the original question
+- Triggered when similarity score is below 0.35
+- **Email delivery:** implemented via SMTP with a Gmail App Password, not Gmail's OAuth node — the OAuth credential was broken/unreconnectable and fixing it was deprioritized in favor of a simpler, equally-secure approach for a single-account project
+- Escalation email includes employee name and email (added after initial build) so HR can follow up directly
 
 ### 3.8 Logging
-- Every request (regardless of outcome) is written to a Google Sheet via n8n's Google Sheets node
-- Required fields: `timestamp`, `question`, `matched_chunk` (or blank if none), `confidence_score`, `outcome` (answered/escalated), `response_time_ms`
+- Google Sheets, via a properly configured OAuth Client ID (created fresh in Google Cloud Console after an initial broken credential)
+- Fields: timestamp, question, matched_topic, confidence_score, outcome, answer_or_action, employee_name, employee_email
+- **Both logging nodes set to "On Error: Continue"** — a logging failure must never block the employee's response (this was a real bug found and fixed; see diary)
 
 ### 3.9 Error Handling
-- API calls to Hugging Face and Groq must have retry logic (e.g., 1-2 retries with basic backoff) before failing
-- On unrecoverable failure, the workflow should log the failure and return a graceful error message to the user, not a raw error/stack trace
+- Sheets logging nodes configured to continue on failure rather than halting the whole execution
+- JSON request/response bodies built using n8n Expression mode with real object syntax (`{{ {...} }}`), not string templating — this avoids breakage when AI-generated text contains quotes or line breaks (a real bug hit twice during the build)
 
-### 3.10 Frontend (final phase)
-- A single static HTML/JS page with a text input, submit button, and response display area
-- Calls the n8n webhook directly via a JS `fetch()` request
-- No build tooling required — plain HTML/CSS/JS, hostable for free (e.g., GitHub Pages)
+### 3.10 Frontend (delivered)
+- `index.html` — landing page: hero, feature grid, "how it works," direct email-to-HR option, light/dark theme toggle
+- `chat.html` — chat interface: message bubbles, typing indicator, timestamps, clear-conversation button, light/dark theme (synced with landing page via localStorage)
+- Both are plain HTML/CSS/JS, no build tooling, hostable for free
 
 ## 4. Non-Functional Requirements
-- **Cost:** $0 — must operate fully within free-tier limits of all services used
-- **Latency:** Best-effort; no strict SLA for a learning project, but response should feel reasonably responsive in a live demo (a few seconds is acceptable)
-- **Security:** No secrets committed to the repo; use `.gitignore` for any local config/credential files
+- **Cost:** $0
+- **Latency:** a few seconds per response, acceptable for a demo/internal tool
+- **Security:** no secrets committed to the repo
 
 ## 5. Dependencies
-- n8n (self-hosted via Docker, or n8n.cloud free tier)
-- Groq account + API key
-- Hugging Face account + API key
-- Google account (Sheets + Gmail API access)
-- GitHub (version control, hosting frontend via Pages if used)
+- n8n (self-hosted via Docker)
+- Groq account + API key (Header Auth credential)
+- Hugging Face account + API key (Header Auth credential)
+- Google Cloud project with OAuth Client ID (Sheets) + Gmail App Password (SMTP)
+- GitHub
