@@ -172,6 +172,28 @@ Next: Day 4 — build the LIVE question-answering workflow (webhook → embed qu
 - **The entire core backend (both branches, retrieval, generation, escalation, logging) is now complete and tested.**
 - Remaining: run the full 15-20 question test set, build the frontend page, final docs/README polish
 
+### Day 5 (cont.) — In-progress bug: empty response on both branches
+- After confirming parallel-branch wiring was already correctly implemented (verified by reading exported workflow JSON directly), full test script still returned empty answers on ALL 15 questions, including escalation (which uses a fixed, hardcoded message) — ruling out anything Groq/Sheets-specific
+- Direct single-request test confirmed the response body is a truly empty string (not even `{"answer": ""}`) — suggests the issue is at the Webhook/Respond-to-Webhook level itself, not the internal branch logic
+- Not yet checked: whether the workflow's Active toggle silently turned off after node edits (known n8n behavior in some cases)
+- Paused here to resume with a clear head — next session should start by checking Active status, then re-verifying the Webhook node's "Respond" setting is still "Using Respond to Webhook Node"
+
+### Day 5/6 — MAJOR debugging saga: empty responses, Google OAuth, and JSON newline bug
+This took a long session to fully resolve — logging the full trail since it's genuinely valuable debugging material.
+
+**Symptom 1: All test questions returned empty answers**, including escalation (which uses fixed text) — ruling out anything Groq/logic-specific.
+**Root cause found via Executions tab (not the Editor):** every recent execution showed "Error," not silent success — we'd been looking at the wrong view (idle Editor canvas) instead of real Execution history, which cost significant debugging time. Lesson: always check Executions tab for ground truth, not the Editor's live/idle state.
+
+**Real errors found once looking at Executions:**
+1. n8n's "Publish" button is a VERSIONED publish system, not a simple Active toggle — production runs whatever was last explicitly published, not live editor changes. Had to republish after every fix.
+2. Google Sheets credential's Client ID field somehow contained a Gmail address instead of a real OAuth Client ID — the underlying Google Cloud OAuth client was broken/invalid. Fixed properly this time (unlike Gmail's SMTP workaround) by creating a fresh OAuth Client ID via Google Cloud Console (Branding → Audience → Clients), adding the correct redirect URI, and reconnecting.
+3. By default, n8n stops the ENTIRE workflow execution when ANY node fails — even on a separate parallel branch. This meant a failing Sheets node was silently killing the Respond-to-Webhook node too. Fixed by setting "On Error: Continue" on both Sheets logging nodes, so logging failures never block the employee's response again.
+4. Even after all that, ONE specific test question ("What if I need WFH for a family reason?") still failed — Groq's answer this time included a bulleted list with real line breaks, which broke raw-string JSON templating in "Respond to Webhook" the same way embedded quotes did earlier with the Groq request body. Fixed with the same durable solution: Expression mode (`{{ { answer: $json.answer } }}`) instead of string templating, which correctly handles any text content Groq generates, including quotes and newlines.
+
+**Final test set result: 14/15 correct on first full run (93%), 15/15 after fixing the newline bug.** Well above our 80% target.
+
+**Key lesson for future n8n projects:** always build JSON request/response bodies using Expression mode with real object syntax, never by templating `{{ }}` into a raw JSON string — string templating breaks on any special character (quotes, newlines) that user-generated or AI-generated content might contain.
+
 ## Bugs & Fixes Log
 
 ### Bug 1: Hugging Face embedding API — "connection cannot be established, incorrect host domain"
