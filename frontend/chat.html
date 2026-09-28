@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat | HR-Assist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="side glass">
+    <a class="brand" href="index.html"><span class="logo">HR</span>HR-Assist</a>
+    <div>
+      <h2>Topics covered</h2>
+      <div class="chips"><span class="chip">Leave</span><span class="chip">Work from home</span><span class="chip">Insurance</span><span class="chip">Travel</span><span class="chip">Resignation</span></div>
+    </div>
+    <div>
+      <h2>How it works</h2>
+      <div class="stp">
+        <div><b>1</b><span>Ask a question in plain language.</span></div>
+        <div><b>2</b><span>Policy documents are searched for a match.</span></div>
+        <div><b>3</b><span>You get a grounded answer, or it goes to HR.</span></div>
+      </div>
+    </div>
+    <div class="help">Can't find what you need? A real person can help.<br><a href="mailto:hr@company.com">hr@company.com</a></div>
+  </aside>
+
+  <main class="main glass">
+    <header class="top">
+      <div class="ttl">
+        <a class="icon-btn" href="index.html" aria-label="Back to home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <div><b>HR-Assist</b><span class="st" id="st"><i></i><span id="stt">Online</span></span></div>
+      </div>
+      <div class="ctl">
+        <input id="nm" type="text" placeholder="Your name" autocomplete="name" aria-label="Your name">
+        <input id="em" type="email" placeholder="Your email" autocomplete="email" aria-label="Your email">
+        <button class="btn" id="clr" style="padding:8px 16px">New chat</button>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></button>
+      </div>
+    </header>
+
+    <div id="chat" aria-live="polite"></div>
+
+    <div class="sugg" id="sugg">
+      <button class="chip">What is the leave policy?</button>
+      <button class="chip">Can I work from home?</button>
+      <button class="chip">What does insurance cover?</button>
+      <button class="chip">How do I claim travel expenses?</button>
+      <button class="chip">How do I resign?</button>
+    </div>
+
+    <div class="bar-in">
+      <div class="inp">
+        <textarea id="q" rows="1" placeholder="Ask about leave, WFH, insurance, travel or resignation" aria-label="Your question"></textarea>
+        <button class="send" id="send" aria-label="Send"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+      </div>
+      <div class="note">Add your name and email so HR can reply if your question is escalated.</div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Opened as a local file: talk to n8n directly. Anywhere else (Vercel): use the /api/ask proxy.
+const ENDPOINT = location.protocol === 'file:' ? 'http://localhost:5678/webhook/hr-question' : '/api/ask';
+const $ = id => document.getElementById(id);
+const chat = $('chat'), q = $('q'), send = $('send'), nm = $('nm'), em = $('em'), sugg = $('sugg');
+const WELCOME = "Hi, I'm HR-Assist. Ask me about leave, work from home, insurance, travel or resigning.";
+
+try { nm.value = localStorage.getItem('hrName') || ''; em.value = localStorage.getItem('hrEmail') || ''; } catch (e) {}
+nm.oninput = em.oninput = () => { try { localStorage.setItem('hrName', nm.value); localStorage.setItem('hrEmail', em.value); } catch (e) {} };
+
+const time = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+const LABEL = { answered: 'From company policy', escalated: 'Sent to HR', error: 'Could not send' };
+
+function add(role, text, kind) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  const av = role === 'bot' ? 'HR' : (nm.value.trim()[0] || 'Y').toUpperCase();
+  d.innerHTML = `<div class="av">${av}</div><div><div class="bub ${kind || ''}">${kind ? `<span class="tag">${LABEL[kind]}</span>` : ''}${esc(text)}</div><div class="time">${time()}</div></div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setStatus(ok) {
+  $('st').classList.toggle('off', !ok);
+  $('stt').textContent = ok ? 'Online' : 'Offline';
+}
+
+async function ask(question) {
+  question = question.trim();
+  if (!question || send.disabled) return;
+  sugg.style.display = 'none';
+  add('user', question);
+  q.value = ''; q.style.height = 'auto';
+  send.disabled = true;
+
+  const t = document.createElement('div');
+  t.className = 'msg bot';
+  t.innerHTML = '<div class="av">HR</div><div class="bub typing"><i></i><i></i><i></i></div>';
+  chat.appendChild(t); chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, employeeName: nm.value.trim(), employeeEmail: em.value.trim() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.answer) throw new Error('Empty answer');
+    t.remove();
+    add('bot', data.answer, /forwarded to hr/i.test(data.answer) ? 'escalated' : 'answered');
+    setStatus(true);
+  } catch (err) {
+    t.remove();
+    add('bot', 'HR-Assist is not responding right now. Try again in a moment, or email hr@company.com.', 'error');
+    setStatus(false);
+  } finally {
+    send.disabled = false;
+    q.focus();
+  }
+}
+
+function reset() {
+  chat.innerHTML = '';
+  add('bot', WELCOME);
+  sugg.style.display = '';
+}
+
+send.onclick = () => ask(q.value);
+q.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(q.value); } };
+q.oninput = () => { q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 120) + 'px'; };
+sugg.onclick = e => { if (e.target.tagName === 'BUTTON') ask(e.target.textContent); };
+$('clr').onclick = reset;
+reset();
+</script>
+</body>
+</html>
