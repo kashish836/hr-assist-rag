@@ -28,10 +28,11 @@ Built end-to-end with n8n as the orchestration layer, this project was also an e
 ## Try It
 
 ```
-frontend/index.html   → landing page
-frontend/chat.html    → chat interface
+frontend/hr-assist.html   → landing page + chat, in one file
 ```
 Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
+
+A static copy is also hosted on Vercel for browsing the UI: **[link]**. The landing page works for any visitor; the chat only responds when *you personally* have local n8n running, since the page talks to `localhost:5678` by design (see [Known Limitations](#known-limitations)).
 
 ---
 
@@ -45,7 +46,7 @@ Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
 | Retrieval | Cosine similarity (custom JS implementation) |
 | Logging | Google Sheets (OAuth2) |
 | Escalation delivery | SMTP (Gmail App Password) |
-| Frontend | Plain HTML / CSS / JS — no build tooling |
+| Frontend | Single-file HTML/CSS/JS — no build tooling |
 
 ---
 
@@ -55,8 +56,8 @@ Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
 - Confidence-threshold routing: answers when it knows, escalates when it doesn't
 - Escalation emails include employee name + email for direct follow-up
 - Every interaction logged (answered or escalated) with full structured detail
-- Two-page frontend: marketing-style landing page + full chat interface
-- Light/dark theme, synced across pages
+- Single-file frontend: landing page and chat interface in one page, switched client-side with no page reload
+- Blue/black glass UI (frosted cards, rounded corners), with a light/dark theme toggle
 
 ---
 
@@ -103,6 +104,7 @@ Full test log in [Testing-QA.md](docs/Testing-QA.md).
 - Groq's available model lineup changed twice; resolved by querying the account's real available models via Groq's own API instead of trusting docs.
 - n8n halts an entire execution when any node fails, even on a separate branch — a stale logging credential was silently blocking employee responses. Fixed with parallel branching + "Continue on error."
 - AI-generated answers containing quotes/line breaks broke raw JSON string templating — fixed by building request/response bodies with real expression syntax instead.
+- Attempted to host n8n itself on Render's free tier (with Supabase Postgres for persistence) to get a fully public demo; hit a memory crash on the 512MB free instance. Reverted to local-only hosting rather than sinking more time into a workaround with limited payoff for a portfolio demo.
 
 Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
 
@@ -110,7 +112,7 @@ Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
 
 ## Known Limitations
 
-- Runs against a local n8n instance — not publicly hosted
+- Runs against a local n8n instance — not publicly hosted. The Vercel-hosted frontend is a static copy of the UI; its chat only works when the viewer has local n8n running, since `localhost` always resolves to the viewer's own machine, not the deployer's.
 - English only, no multilingual support
 - No conversation memory — each question is handled independently
 - No employee authentication (name/email are self-reported, not verified)
