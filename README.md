@@ -21,17 +21,19 @@ A RAG-based HR policy assistant that gives employees instant, grounded answers t
 
 HR-Assist reads a company's actual HR policy documents and answers employee questions in natural language, using retrieval-augmented generation (RAG) rather than relying on an LLM's general knowledge. If a question falls outside what's documented, it's routed to HR by email — with the employee's name and contact info attached — instead of producing an unreliable answer.
 
-Built end-to-end with n8n as the orchestration layer, this project was also an exercise in debugging real production issues: deprecated APIs, broken OAuth credentials, and workflow failure-handling — all documented in the [project diary](project_diary.md).
+Built end-to-end with n8n as the orchestration layer, this project was also an exercise in debugging real production issues: deprecated APIs, broken OAuth credentials, workflow failure-handling, and a public-hosting attempt that hit real resource limits — all documented in the [project diary](project_diary.md).
 
 ---
 
 ## Try It
 
 ```
-frontend/index.html   → landing page
-frontend/chat.html    → chat interface
+frontend/hr-assist.html   → landing page + chat, in a single file
 ```
-Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
+
+Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup). Open the file directly in a browser — no build step, no server needed on the frontend side.
+
+A static copy of this page is also hosted on Vercel: **[link]**. The landing page renders fully for any visitor. The chat only responds when *you personally* have local n8n running, since the page calls `localhost:5678` by design — see [Known Limitations](#known-limitations) for why.
 
 ---
 
@@ -45,7 +47,8 @@ Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
 | Retrieval | Cosine similarity (custom JS implementation) |
 | Logging | Google Sheets (OAuth2) |
 | Escalation delivery | SMTP (Gmail App Password) |
-| Frontend | Plain HTML / CSS / JS — no build tooling |
+| Frontend | Single-file HTML/CSS/JS — no build tooling |
+| Frontend hosting | Vercel (static) |
 
 ---
 
@@ -55,8 +58,8 @@ Requires the n8n workflow running locally (see [TRD](docs/TRD.md) for setup).
 - Confidence-threshold routing: answers when it knows, escalates when it doesn't
 - Escalation emails include employee name + email for direct follow-up
 - Every interaction logged (answered or escalated) with full structured detail
-- Two-page frontend: marketing-style landing page + full chat interface
-- Light/dark theme, synced across pages
+- Single-file frontend: landing page and chat interface in one page, switched client-side with no page reload
+- Blue/black glass UI (frosted cards, rounded corners, soft gradient glow), with a light/dark theme toggle
 
 ---
 
@@ -78,7 +81,7 @@ Employee question (chat UI)
  Groq LLM generates grounded answer → Log → Respond
 ```
 
-Full diagram and design rationale in [Architecture.md](docs/Architecture.md).
+Full diagram and design rationale, including the frontend rebuild and the hosting decision, in [Architecture.md](docs/Architecture.md).
 
 ---
 
@@ -103,6 +106,7 @@ Full test log in [Testing-QA.md](docs/Testing-QA.md).
 - Groq's available model lineup changed twice; resolved by querying the account's real available models via Groq's own API instead of trusting docs.
 - n8n halts an entire execution when any node fails, even on a separate branch — a stale logging credential was silently blocking employee responses. Fixed with parallel branching + "Continue on error."
 - AI-generated answers containing quotes/line breaks broke raw JSON string templating — fixed by building request/response bodies with real expression syntax instead.
+- Attempted to host n8n itself on Render's free tier (with Supabase Postgres for persistence) to get a fully public demo; hit a memory crash on the 512MB free instance. Reverted to local-only hosting rather than sinking more time into re-provisioning credentials for limited payoff on a portfolio demo.
 
 Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
 
@@ -110,7 +114,7 @@ Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
 
 ## Known Limitations
 
-- Runs against a local n8n instance — not publicly hosted
+- The backend (n8n) runs locally, not publicly hosted. The Vercel-hosted frontend is a static copy of the UI; its chat only works when the viewer has their own local n8n instance running, since `localhost` always resolves to the viewer's own machine, not the deployer's.
 - English only, no multilingual support
 - No conversation memory — each question is handled independently
 - No employee authentication (name/email are self-reported, not verified)
@@ -126,7 +130,7 @@ Full root-cause writeups for every bug in [project_diary.md](project_diary.md).
 
 ## Project Docs
 
-[PRD](docs/PRD.md) · [TRD](docs/TRD.md) · [Architecture](docs/Architecture.md) · [Feature List](docs/Feature.md) · [API/Integration](docs/API-Integration.md) · [Testing & QA](docs/Testing-QA.md) · [Workflow Notes](notes.md) · [Full Project Diary](project_diary.md)
+[PRD](docs/PRD.md) · [TRD](docs/TRD.md) · [Architecture](docs/Architecture.md) · [Feature List](docs/Feature.md) · [API/Integration](docs/API-Integration.md) · [Testing & QA](docs/Testing-QA.md) · [Full Project Diary](project_diary.md)
 
 ---
 

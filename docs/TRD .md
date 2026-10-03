@@ -12,8 +12,8 @@ Defines the technical requirements and constraints for HR-Assist RAG, updated to
 ## 3. System Requirements (as built)
 
 ### 3.1 Input
-- Two-page web frontend: a home/landing page and a chat interface
-- Chat interface posts to an n8n webhook via `fetch()`, including `question`, `employeeName`, and `employeeEmail`
+- Single-file web frontend (`frontend/hr-assist.html`): landing view and chat view in one HTML file, switched client-side with JavaScript (no page reload)
+- Chat view posts to an n8n webhook via `fetch()`, including `question`, `employeeName`, and `employeeEmail`
 
 ### 3.2 Embeddings
 - Hugging Face's Inference Providers router: `https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction`
@@ -50,10 +50,17 @@ Defines the technical requirements and constraints for HR-Assist RAG, updated to
 - Sheets logging nodes configured to continue on failure rather than halting the whole execution
 - JSON request/response bodies built using n8n Expression mode with real object syntax (`{{ {...} }}`), not string templating — this avoids breakage when AI-generated text contains quotes or line breaks (a real bug hit twice during the build)
 
-### 3.10 Frontend (delivered)
-- `index.html` — landing page: hero, feature grid, "how it works," direct email-to-HR option, light/dark theme toggle
-- `chat.html` — chat interface: message bubbles, typing indicator, timestamps, clear-conversation button, light/dark theme (synced with landing page via localStorage)
-- Both are plain HTML/CSS/JS, no build tooling, hostable for free
+### 3.10 Frontend (as built, current)
+- `frontend/hr-assist.html` — single self-contained file: landing view (hero, feature grid, "how it works," direct email-to-HR option) and chat view (message bubbles, typing indicator, timestamps, clear-conversation button, suggested questions), toggled in-page via JavaScript
+- Blue/near-black "glass" visual design (frosted cards, blurred background glow, rounded corners), with a light/dark theme toggle persisted via `localStorage`
+- No build tooling; no external CSS/JS files — everything inlined into the one HTML file to eliminate cross-file dependency issues that affected the original two-page version
+- Calls `http://localhost:5678/webhook/hr-question` directly; no server-side proxy
+
+### 3.11 Deployment
+- `frontend/hr-assist.html` is deployed to Vercel as a static page (no backend functions, no environment variables required)
+- The page itself (landing view) renders correctly for any visitor
+- The chat view only functions for a visitor who has their own local n8n instance running at `localhost:5678`, since that address always resolves to the requester's own machine
+- A public backend hosting attempt (n8n on Render + Supabase Postgres) was made and reverted — see [Architecture.md](Architecture.md) §6 and [API-Integration.md](API-Integration.md) §7 for what was tried and why it wasn't adopted
 
 ## 4. Non-Functional Requirements
 - **Cost:** $0
@@ -66,3 +73,4 @@ Defines the technical requirements and constraints for HR-Assist RAG, updated to
 - Hugging Face account + API key (Header Auth credential)
 - Google Cloud project with OAuth Client ID (Sheets) + Gmail App Password (SMTP)
 - GitHub
+- Vercel (static hosting for `hr-assist.html` only)

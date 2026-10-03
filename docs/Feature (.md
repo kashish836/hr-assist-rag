@@ -13,30 +13,32 @@
 | 7 | Escalation to HR | ✅ Delivered | Via SMTP, includes employee identity |
 | 8 | Structured logging | ✅ Delivered | Google Sheets, includes employee identity |
 | 9 | Error handling & retries | ✅ Delivered | Parallel branching + "Continue on error" |
-| 10 | Web frontend | ✅ Delivered, expanded | Two pages: landing + chat, light/dark theme |
+| 10 | Web frontend | ✅ Delivered, redesigned | Single file: landing + chat, blue/black glass UI, light/dark theme |
 | 11 | Test set evaluation | ✅ Delivered | 15/15 (100%) accuracy — see Testing-QA.md |
+| 12 | Static public hosting (frontend only) | ✅ Delivered | `hr-assist.html` deployed to Vercel as a static page |
 
 ## Delivered Beyond Original Plan
 
 | Feature | Description |
 |---|---|
 | Employee identity capture | Frontend collects name/email, threaded through to escalation emails and logs |
-| Two-page frontend | Landing page (feature grid, direct email-to-HR) + full chat interface, not a single basic form |
-| Light/dark theme toggle | Synced across both pages via localStorage |
-| Chat-style UI | Message bubbles, typing indicator, timestamps, conversation reset |
+| Single-file frontend | Landing view (feature grid, direct email-to-HR) and full chat interface in one HTML file, switched client-side — replaces the original two-page design to remove cross-file dependency issues |
+| Glass UI redesign | Frosted-card, blue/black visual design with rounded corners and a light/dark theme toggle, replacing the original flat light/dark palette |
+| Light/dark theme toggle | Synced across both views via localStorage |
+| Chat-style UI | Message bubbles, typing indicator, timestamps, conversation reset, clickable suggested questions |
 | Parallel branch architecture | More robust than originally planned sequential chain — logging/email failures can't block the employee's answer |
 
-## v2 / Future Work (Unchanged, Out of Scope for v1)
+## v2 / Future Work (Updated)
 
 | # | Feature | Description |
 |---|---|---|
-| 12 | Multilingual support | Handle questions in Hindi/English |
-| 13 | India-specific compliance Q&A | Labor law, PF, gratuity-specific content |
-| 14 | Multi-turn conversation | Follow-up questions with real backend memory |
-| 15 | Admin dashboard | HR-facing UI to update policy documents |
-| 16 | Slack/Teams integration | Accept questions via chat platforms |
-| 17 | Authentication | Employee login/identity verification |
-| 18 | Public hosting | Currently runs against a local n8n instance only |
+| 13 | Multilingual support | Handle questions in Hindi/English |
+| 14 | India-specific compliance Q&A | Labor law, PF, gratuity-specific content |
+| 15 | Multi-turn conversation | Follow-up questions with real backend memory |
+| 16 | Admin dashboard | HR-facing UI to update policy documents |
+| 17 | Slack/Teams integration | Accept questions via chat platforms |
+| 18 | Authentication | Employee login/identity verification |
+| 19 | Public backend hosting | Attempted on Render (free tier) + Supabase Postgres; hit a memory limit crash on Render's free 512MB instance and was reverted — see Architecture.md §6. Revisiting this would require either a paid Render tier or a different host with more free memory headroom. |
 
 ## Related but Separate Project
 

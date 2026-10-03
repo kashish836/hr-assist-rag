@@ -28,7 +28,7 @@ This is a validated, real-world pattern — not a hypothetical problem:
 - Apply a confidence threshold: if no sufficiently relevant match is found, escalate instead of answering
 - Escalate unanswered questions to HR via email, including the employee's name and email for follow-up
 - Log every interaction (answered or escalated) with structured fields, including employee identity
-- **Delivered beyond original plan:** a two-page frontend — a marketing-style home page (feature grid, direct "email HR" option) and a full chat interface with light/dark theme, timestamps, and conversation reset
+- **Delivered beyond original plan:** a single-file frontend — landing view (feature grid, direct "email HR" option) and a full chat interface in one page, switched client-side, with light/dark theme, timestamps, and conversation reset
 
 ## 6. Out of Scope (v1) — Future Work
 
@@ -37,7 +37,7 @@ This is a validated, real-world pattern — not a hypothetical problem:
 - Multi-turn conversational memory (each question is treated independently)
 - Authentication/login for employees
 - Admin dashboard for HR to manage/update policy documents through a UI
-- Hosting the tool publicly (currently runs against a local n8n instance)
+- Publicly hosting the backend (n8n). A public hosting attempt (Render + Supabase) was made and reverted after hitting free-tier resource limits — see [Architecture.md](Architecture.md) §6. The frontend alone is publicly hosted (Vercel); the chat still requires the visitor's own local n8n instance.
 
 ## 7. Success Criteria — RESULTS
 

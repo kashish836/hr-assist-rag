@@ -33,8 +33,9 @@ We construct a message to send the LLM that includes both the retrieved policy t
 > Note: Combine the matched policy text + the question into one prompt, instructing the LLM to answer only from that text.
 
 **7. Send prompt to Groq LLM**
-This is a straightforward API call — we send our constructed prompt to Groq's API (running Llama 3.1), the same way you'd call any AI API.
+This is a straightforward API call — we send our constructed prompt to Groq's API, the same way you'd call any AI API.
 > Note: Send the prompt to Groq's LLM API to generate a response.
+> **Planning-stage assumption, later changed:** this note originally named "Llama 3.1" as the model. During actual build, the Groq account had no Llama-family chat models available — see `project_diary.md` Bug 3. The real model used is `openai/gpt-oss-20b`, confirmed by querying Groq's own `/v1/models` endpoint directly. The *concept* (send prompt → get grounded answer) is unchanged; only the specific model name was wrong at planning time.
 
 **8. Groq generates the answer**
 The LLM reads the context we gave it and writes a natural-language answer using only that information (assuming our prompt instructions work correctly — to be tested).
@@ -47,6 +48,7 @@ If the similarity score was too low, instead of answering, we prepare a message 
 **10. Send email to HR (Gmail node)**
 n8n has a built-in Gmail node that can send an actual email — we use it to notify HR that a question needs their attention.
 > Note: Use n8n's Gmail node to actually send the escalation email to the HR team.
+> **Planning-stage assumption, later changed:** the plan was to use n8n's Gmail OAuth node. During actual build, the Gmail OAuth credential broke and couldn't be reconnected — see `project_diary.md` and `docs/API-Integration.md` §4. The real implementation uses n8n's generic SMTP "Send Email" node with a Gmail App Password instead, which achieves the same result (HR gets notified by email) without needing a working OAuth connection.
 
 **11. Log to Sheets: "ESCALATED"**
 We record this interaction in Google Sheets, marking it clearly as an escalated (not directly answered) case.
@@ -59,6 +61,7 @@ Whichever path was taken, the employee gets a response — either the actual ans
 **13. Log to Sheets (both paths reunite here)**
 Regardless of which branch was taken, every interaction gets logged with the same structured fields: timestamp, question, matched chunk (if any), confidence score, answered-or-escalated, and response time. This is our data for measuring accuracy and spotting recurring questions later.
 > Note: Every interaction — answered or escalated — gets logged with the same structured fields for tracking and analysis.
+> **Design refinement, later changed:** this note describes a single sequential log step. The actual build splits answer-logging and escalation-logging into **separate, parallel branches** rather than one shared step, because n8n halts an entire execution if any node fails — a failing log step in a single shared chain was silently blocking the employee's response. See `docs/Architecture.md` §3 for the full explanation.
 
 ---
 
@@ -92,6 +95,8 @@ Regardless of which branch was taken, every interaction gets logged with the sam
         └──────────→ [13] Log to Sheets: question, matched chunk,
                           confidence score, answered/escalated, timestamp
 ```
+
+> **Note on this diagram:** this is the planning-stage diagram and is kept as-is for historical reference. The as-built pipeline (correct model name, SMTP instead of Gmail OAuth, parallel rather than shared logging branches) is diagrammed accurately in `docs/Architecture.md` §2.
 
 ---
 
@@ -151,6 +156,8 @@ cosine_similarity = (A · B) / (|A| × |B|)
 
 **How we use it:** compare the employee's question embedding against each of our 5 policy chunk embeddings, pick the highest-scoring chunk. If even the best score is below our chosen threshold, escalate instead of answering — this is literally what makes the bot "know what it doesn't know."
 
+**Confirmed against real data (Day 9-10 testing):** correct matches scored ~0.35–0.75, unrelated chunks scored ~-0.001–0.25 — a clean gap, which is why the final threshold was set to 0.35 rather than the originally estimated 0.6-0.7 range. See `docs/Testing-QA.md` for the full test set.
+
 ---
 
 ## Concept Check — Quiz Recap (Day 1)
@@ -165,3 +172,17 @@ Score: 4/5 (80%) on first attempt, 5/5 after review.
 | 5 | When does logging happen? | On both paths — answered AND escalated — both branches reunite into the same logging step |
 
 **Reinforced understanding (in own words):** the policy document only needs to be chunked and embedded one time, upfront, as a setup step — re-embedding it on every single employee question would be wasteful and pointless since the document itself isn't changing per question.
+
+---
+
+## Since These Notes Were Written: What Changed in the Real Build
+
+These notes capture the *planning-stage* thinking, which is why they're kept intact above rather than edited in place — the reasoning here is still correct and useful as a record of how the design was worked out. Three things diverged from plan to actual implementation (each is flagged inline above, with the full story in `project_diary.md`):
+
+1. **LLM model:** planned as Llama 3.1 via Groq; actually built with `openai/gpt-oss-20b`, since the Groq account had no Llama-family chat models available.
+2. **Escalation email:** planned via n8n's Gmail OAuth node; actually built via SMTP + a Gmail App Password, since the OAuth credential broke and wasn't worth re-fixing for a single-account project.
+3. **Logging structure:** planned as one shared logging step after both branches reunite; actually built as two separate, parallel logging branches, because a single shared chain let a Sheets failure silently block the employee's response.
+
+None of these changes affect the underlying RAG concept this file teaches (embed → retrieve → compare → generate-or-escalate → log) — they're implementation details that shifted once real APIs and real failure modes were encountered.
+
+This file covers the **backend workflow concepts only**. The frontend (originally planned as a simple form, later built and then rebuilt twice) and the hosting setup are not part of these notes — see `docs/Architecture.md` for both.

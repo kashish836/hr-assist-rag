@@ -27,6 +27,8 @@ A defined test set with measurable accuracy was used, rather than ad-hoc manual 
 
 **Final result: 15/15 (100%) accuracy** — well above the ≥80% target set in the PRD.
 
+This test set was run against the backend (n8n workflow) only and is unaffected by the later frontend rebuild or the Render hosting attempt — both are described in [Architecture.md](Architecture.md). After the frontend redesign, the same 15-question set was re-verified manually through the new `hr-assist.html` chat UI (answered/escalated styling, employee-identity fields) with no change in backend behavior.
+
 ## 3. Confidence Score Observations
 
 Real similarity scores from testing showed a clear separation:
@@ -42,6 +44,7 @@ This gap validated the chosen **0.35 confidence threshold** — comfortably belo
 - Google Sheets and Gmail OAuth credentials both went stale/broken at different points; handled differently (Sheets: fixed properly with a fresh OAuth client; Gmail: worked around with SMTP)
 - Two separate instances of a JSON-templating bug, where AI-generated text containing quotes or line breaks broke raw string substitution in JSON bodies — fixed with n8n's Expression mode using real object syntax
 - Groq deprecated/restricted model access twice during the project; resolved by querying the account's actual available models directly via Groq's API rather than trusting external documentation
+- (Post-launch, infra) Render's free-tier memory limit (512MB) crashed a self-hosted n8n instance during a public-hosting attempt; not a bug in the HR-Assist workflow itself, but logged here since it affects deployment planning — see Architecture.md §6
 
 ## 5. Manual QA Checklist — Final Status
 
@@ -52,6 +55,8 @@ This gap validated the chosen **0.35 confidence threshold** — comfortably belo
 - [x] Escalation emails are actually received, including employee identity
 - [x] Every test run appears correctly in Google Sheets with all fields populated, including employee identity
 - [x] No API keys visible anywhere in the committed repo
+- [x] Single-file frontend (`hr-assist.html`) connects to local n8n and reproduces all answered/escalated behavior correctly
+- [x] Deployed Vercel copy of `hr-assist.html` renders the landing page correctly for a visitor with no local n8n running (chat correctly shows "not responding" rather than failing silently)
 
 ## 6. Bug Tracking
 

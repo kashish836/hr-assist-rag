@@ -4,13 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HR-Assist | Instant answers from your HR policies</title>
-<meta name="description" content="HR-Assist answers employee questions from real HR policy documents and routes anything it can't answer to HR.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#070B14;--text:#EAF0FF;--dim:#9AA6C3;--faint:#647092;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.11);--gb:rgba(255,255,255,.13);--sh:0 10px 40px rgba(0,0,0,.35);--acc:#2DD4BF;--acc2:#6366F1;--amb:#F5A623;--red:#F0707A;--o1:rgba(45,212,191,.26);--o2:rgba(99,102,241,.30)}
-html[data-theme=light]{--bg:#EBF0FA;--text:#131A2B;--dim:#525D77;--faint:#8791AB;--glass:rgba(255,255,255,.6);--glass2:rgba(255,255,255,.9);--gb:rgba(255,255,255,.95);--sh:0 10px 40px rgba(40,55,110,.13);--acc:#0C8F84;--acc2:#4F46E5;--amb:#A8650A;--red:#C93C46;--o1:rgba(45,212,191,.34);--o2:rgba(99,102,241,.24)}
+:root{--bg:#05070D;--text:#EDF1FA;--dim:#96A1BD;--faint:#5C6684;--glass:rgba(255,255,255,.045);--glass2:rgba(255,255,255,.09);--gb:rgba(145,170,255,.14);--sh:0 14px 44px rgba(0,0,0,.45);--acc:#4F8CF6;--acc2:#5A5FE0;--amb:#8B93F0;--red:#E8707A;--o1:rgba(49,99,214,.24);--o2:rgba(79,65,200,.26)}
+html[data-theme=light]{--bg:#EEF2FB;--text:#10172B;--dim:#4C5771;--faint:#8792AC;--glass:rgba(255,255,255,.62);--glass2:rgba(255,255,255,.92);--gb:rgba(60,90,200,.16);--sh:0 14px 44px rgba(30,45,110,.14);--acc:#2049D6;--acc2:#4338CA;--amb:#5347D8;--red:#C1414B;--o1:rgba(49,99,214,.26);--o2:rgba(67,56,202,.20)}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--text);font:15px/1.55 'Inter',system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -22,19 +21,18 @@ a{color:inherit;text-decoration:none}
 .glass{background:var(--glass);border:1px solid var(--gb);border-radius:24px;box-shadow:var(--sh),inset 0 1px 0 rgba(255,255,255,.1);-webkit-backdrop-filter:blur(22px) saturate(170%);backdrop-filter:blur(22px) saturate(170%)}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font:600 14px 'Inter',sans-serif;border:1px solid var(--gb);color:var(--text);background:var(--glass);cursor:pointer;transition:transform .2s,background .2s}
 .btn:hover{transform:translateY(-1px);background:var(--glass2)}
-.btn.pri{background:linear-gradient(135deg,#0D9488,#4F46E5);color:#fff;border:0;box-shadow:0 8px 24px var(--o2)}
+.btn.pri{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0;box-shadow:0 8px 24px var(--o2)}
 .icon-btn{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--gb);background:var(--glass);color:var(--dim);cursor:pointer;flex-shrink:0}
 .icon-btn:hover{color:var(--acc)}
 .chip{font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid var(--gb);background:var(--glass);color:var(--dim);font-family:inherit}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-.01em}
-.logo{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#0D9488,#4F46E5);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+.logo{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
 .dim{color:var(--dim)}
 
-/* landing */
 .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
 .nav{margin:18px auto 0;max-width:1080px;display:flex;align-items:center;justify-content:space-between;padding:10px 12px 10px 20px;border-radius:999px}
 .nav-r{display:flex;align-items:center;gap:10px}
-.nav-r a.l{font-size:14px;color:var(--dim);padding:0 8px}
+.nav-r a.l{font-size:14px;color:var(--dim);padding:0 8px;cursor:pointer}
 .nav-r a.l:hover{color:var(--text)}
 .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding:84px 0 64px}
 h1{font-size:50px;line-height:1.08;letter-spacing:-.03em;margin:0 0 18px;font-weight:700}
@@ -43,7 +41,7 @@ h1{font-size:50px;line-height:1.08;letter-spacing:-.03em;margin:0 0 18px;font-we
 .topics{display:flex;gap:8px;flex-wrap:wrap;margin-top:32px}
 .demo{padding:22px;display:flex;flex-direction:column;gap:14px}
 .demo .b{padding:12px 16px;border-radius:18px;max-width:88%;font-size:14px}
-.demo .u{align-self:flex-end;background:linear-gradient(135deg,#0D9488,#4F46E5);color:#fff;border-bottom-right-radius:6px}
+.demo .u{align-self:flex-end;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-bottom-right-radius:6px}
 .demo .a{border:1px solid var(--gb);background:var(--glass2);border-bottom-left-radius:6px;border-left:3px solid var(--acc)}
 .demo .e{border:1px solid var(--gb);background:var(--glass2);border-bottom-left-radius:6px;border-left:3px solid var(--amb)}
 .bar{height:8px;border-radius:4px;background:var(--gb);margin-top:8px}
@@ -62,7 +60,6 @@ h1{font-size:50px;line-height:1.08;letter-spacing:-.03em;margin:0 0 18px;font-we
 .cta p{margin:0;color:var(--dim);font-size:14px}
 footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
 
-/* chat */
 .shell{display:grid;grid-template-columns:290px 1fr;gap:16px;height:100vh;padding:16px}
 .side{padding:24px 20px;display:flex;flex-direction:column;gap:24px;overflow:auto}
 .side h2{font-size:13px;font-weight:600;margin:0 0 10px;color:var(--dim)}
@@ -77,8 +74,8 @@ footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
 .ttl{display:flex;align-items:center;gap:12px}
 .ttl b{display:block;font-size:15px;line-height:1.2}
 .st{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px}
-.st i{width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 8px #34D399}
-.st.off i{background:var(--red);box-shadow:0 0 8px var(--red)}
+.st i{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 3px var(--o1),0 0 10px var(--acc)}
+.st.off i{background:var(--red);box-shadow:0 0 0 3px rgba(240,112,122,.25),0 0 10px var(--red)}
 .ctl{display:flex;align-items:center;gap:8px}
 .ctl input{background:var(--glass);border:1px solid var(--gb);border-radius:999px;padding:8px 14px;color:var(--text);font:13px 'Inter',sans-serif;width:150px}
 .ctl input:focus{outline:none;border-color:var(--acc)}
@@ -87,10 +84,10 @@ footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
 .msg{display:flex;gap:10px;max-width:720px}
 .msg.user{align-self:flex-end;flex-direction:row-reverse}
 .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--glass2);border:1px solid var(--gb);color:var(--dim)}
-.msg.bot .av{background:linear-gradient(135deg,#0D9488,#4F46E5);color:#fff;border:0}
+.msg.bot .av{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0}
 .bub{padding:12px 16px;border-radius:20px;border:1px solid var(--gb);background:var(--glass2);white-space:pre-wrap;line-height:1.6;font-size:14.5px}
 .msg.bot .bub{border-top-left-radius:6px}
-.msg.user .bub{border-top-right-radius:6px;background:linear-gradient(135deg,#0D9488,#4F46E5);color:#fff;border:0}
+.msg.user .bub{border-top-right-radius:6px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0}
 .bub.answered{border-left:3px solid var(--acc)}
 .bub.escalated{border-left:3px solid var(--amb)}
 .bub.error{border-left:3px solid var(--red)}
@@ -111,43 +108,32 @@ footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
 .inp textarea{flex:1;background:transparent;border:0;color:var(--text);font:15px 'Inter',sans-serif;resize:none;max-height:120px;padding:8px 0}
 .inp textarea:focus{outline:none}
 .inp textarea::placeholder{color:var(--faint)}
-.send{width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,#0D9488,#4F46E5);color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+.send{width:40px;height:40px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
 .send:disabled{opacity:.4;cursor:not-allowed}
 .note{text-align:center;font-size:11.5px;color:var(--faint);margin-top:8px}
+
+#view-home,#view-chat{display:none}
+body.v-home #view-home{display:block}
+body.v-chat #view-chat{display:block}
 
 @media(max-width:860px){
 .hero{grid-template-columns:1fr;padding-top:48px}h1{font-size:38px}.grid{grid-template-columns:1fr}.nav-r a.l{display:none}
 .shell{grid-template-columns:1fr;padding:8px;gap:0}.side{display:none}.ctl input{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-<script>
-(function(){
-  var k='hrAssistTheme',t='dark',r=document.documentElement;
-  try{t=localStorage.getItem(k)||'dark'}catch(e){}
-  r.dataset.theme=t;
-  window.addEventListener('DOMContentLoaded',function(){
-    var b=document.getElementById('themeBtn');
-    if(!b)return;
-    b.onclick=function(){
-      t=t==='dark'?'light':'dark';
-      r.dataset.theme=t;
-      try{localStorage.setItem(k,t)}catch(e){}
-    };
-  });
-})();
-</script>
 </head>
-<body>
+<body class="v-home">
 
+<div id="view-home">
 <nav class="nav glass">
-  <a class="brand" href="index.html"><span class="logo">HR</span>HR-Assist</a>
+  <a class="brand" href="#" onclick="return false"><span class="logo">HR</span>HR-Assist</a>
   <div class="nav-r">
     <a class="l" href="#features">Features</a>
     <a class="l" href="#how">How it works</a>
-    <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">
+    <button class="icon-btn" id="themeBtn1" aria-label="Toggle theme">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
     </button>
-    <a class="btn pri" href="chat.html">Open chat</a>
+    <a class="btn pri" href="#" id="goChat">Open chat</a>
   </div>
 </nav>
 
@@ -157,7 +143,7 @@ footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
       <h1>Ask HR anything and get a real answer.</h1>
       <p>HR-Assist reads your company's policy documents and replies in seconds. When a question isn't covered, it says so and sends it to HR with your contact details.</p>
       <div class="acts">
-        <a class="btn pri" href="chat.html">Start chatting</a>
+        <a class="btn pri" href="#" id="goChat2">Start chatting</a>
         <a class="btn" href="mailto:hr@company.com">Email HR</a>
       </div>
       <div class="topics">
@@ -203,6 +189,162 @@ footer{text-align:center;color:var(--faint);font-size:13px;padding:0 0 32px}
 </main>
 
 <footer>HR-Assist is an internal tool built with n8n and retrieval-augmented generation.</footer>
+</div>
 
+<div id="view-chat">
+<div class="shell">
+  <aside class="side glass">
+    <a class="brand" href="#" id="goHome"><span class="logo">HR</span>HR-Assist</a>
+    <div>
+      <h2>Topics covered</h2>
+      <div class="chips"><span class="chip">Leave</span><span class="chip">Work from home</span><span class="chip">Insurance</span><span class="chip">Travel</span><span class="chip">Resignation</span></div>
+    </div>
+    <div>
+      <h2>How it works</h2>
+      <div class="stp">
+        <div><b>1</b><span>Ask a question in plain language.</span></div>
+        <div><b>2</b><span>Policy documents are searched for a match.</span></div>
+        <div><b>3</b><span>You get a grounded answer, or it goes to HR.</span></div>
+      </div>
+    </div>
+    <div class="help">Can't find what you need? A real person can help.<br><a href="mailto:hr@company.com">hr@company.com</a></div>
+  </aside>
+
+  <main class="main glass">
+    <header class="top">
+      <div class="ttl">
+        <a class="icon-btn" href="#" id="backHome" aria-label="Back to home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <div><b>HR-Assist</b><span class="st" id="st"><i></i><span id="stt">Online</span></span></div>
+      </div>
+      <div class="ctl">
+        <input id="nm" type="text" placeholder="Your name" autocomplete="name" aria-label="Your name">
+        <input id="em" type="email" placeholder="Your email" autocomplete="email" aria-label="Your email">
+        <button class="btn" id="clr" style="padding:8px 16px">New chat</button>
+        <button class="icon-btn" id="themeBtn2" aria-label="Toggle theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></button>
+      </div>
+    </header>
+
+    <div id="chat" aria-live="polite"></div>
+
+    <div class="sugg" id="sugg">
+      <button class="chip">What is the leave policy?</button>
+      <button class="chip">Can I work from home?</button>
+      <button class="chip">What does insurance cover?</button>
+      <button class="chip">How do I claim travel expenses?</button>
+      <button class="chip">How do I resign?</button>
+    </div>
+
+    <div class="bar-in">
+      <div class="inp">
+        <textarea id="q" rows="1" placeholder="Ask about leave, WFH, insurance, travel or resignation" aria-label="Your question"></textarea>
+        <button class="send" id="send" aria-label="Send"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+      </div>
+      <div class="note">Add your name and email so HR can reply if your question is escalated.</div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+// theme
+(function(){
+  var k='hrAssistTheme',t='dark',r=document.documentElement;
+  try{t=localStorage.getItem(k)||'dark'}catch(e){}
+  r.dataset.theme=t;
+  function toggle(){
+    t=t==='dark'?'light':'dark';
+    r.dataset.theme=t;
+    try{localStorage.setItem(k,t)}catch(e){}
+  }
+  window.addEventListener('DOMContentLoaded',function(){
+    var b1=document.getElementById('themeBtn1'), b2=document.getElementById('themeBtn2');
+    if(b1)b1.onclick=toggle;
+    if(b2)b2.onclick=toggle;
+  });
+})();
+
+// view switching (no page reload, no separate files)
+function showChat(e){ if(e)e.preventDefault(); document.body.className='v-chat'; }
+function showHome(e){ if(e)e.preventDefault(); document.body.className='v-home'; }
+document.getElementById('goChat').onclick=showChat;
+document.getElementById('goChat2').onclick=showChat;
+document.getElementById('goHome').onclick=showHome;
+document.getElementById('backHome').onclick=showHome;
+
+// chat logic — talks to local n8n directly (this file is opened straight from disk)
+const ENDPOINT = 'http://localhost:5678/webhook/hr-question';
+const $ = id => document.getElementById(id);
+const chat = $('chat'), q = $('q'), send = $('send'), nm = $('nm'), em = $('em'), sugg = $('sugg');
+const WELCOME = "Hi, I'm HR-Assist. Ask me about leave, work from home, insurance, travel or resigning.";
+
+try { nm.value = localStorage.getItem('hrName') || ''; em.value = localStorage.getItem('hrEmail') || ''; } catch (e) {}
+nm.oninput = em.oninput = () => { try { localStorage.setItem('hrName', nm.value); localStorage.setItem('hrEmail', em.value); } catch (e) {} };
+
+const time = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+const LABEL = { answered: 'From company policy', escalated: 'Sent to HR', error: 'Could not send' };
+
+function add(role, text, kind) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  const av = role === 'bot' ? 'HR' : (nm.value.trim()[0] || 'Y').toUpperCase();
+  d.innerHTML = `<div class="av">${av}</div><div><div class="bub ${kind || ''}">${kind ? `<span class="tag">${LABEL[kind]}</span>` : ''}${esc(text)}</div><div class="time">${time()}</div></div>`;
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setStatus(ok) {
+  $('st').classList.toggle('off', !ok);
+  $('stt').textContent = ok ? 'Online' : 'Offline';
+}
+
+async function ask(question) {
+  question = question.trim();
+  if (!question || send.disabled) return;
+  sugg.style.display = 'none';
+  add('user', question);
+  q.value = ''; q.style.height = 'auto';
+  send.disabled = true;
+
+  const t = document.createElement('div');
+  t.className = 'msg bot';
+  t.innerHTML = '<div class="av">HR</div><div class="bub typing"><i></i><i></i><i></i></div>';
+  chat.appendChild(t); chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, employeeName: nm.value.trim(), employeeEmail: em.value.trim() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.answer) throw new Error('Empty answer');
+    t.remove();
+    add('bot', data.answer, /forwarded to hr/i.test(data.answer) ? 'escalated' : 'answered');
+    setStatus(true);
+  } catch (err) {
+    t.remove();
+    add('bot', 'HR-Assist is not responding right now. Make sure your local n8n workflow is running, then try again.', 'error');
+    setStatus(false);
+  } finally {
+    send.disabled = false;
+    q.focus();
+  }
+}
+
+function reset() {
+  chat.innerHTML = '';
+  add('bot', WELCOME);
+  sugg.style.display = '';
+}
+
+send.onclick = () => ask(q.value);
+q.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(q.value); } };
+q.oninput = () => { q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 120) + 'px'; };
+sugg.onclick = e => { if (e.target.tagName === 'BUTTON') ask(e.target.textContent); };
+$('clr').onclick = reset;
+reset();
+</script>
 </body>
 </html>
